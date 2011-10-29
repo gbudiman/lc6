@@ -43,8 +43,13 @@ class assembler {
 
 	public List<String> process(List<String> irTable, boolean debug) {
 		int registerCounter = 0;
+		List<String> strDeclaration = new LinkedList<String>();
 		for (String ir : irTable) {
 			if (debug) { tinyTable.add("----- " + ir); }
+			if (ir.startsWith("STORES")) {
+				String[] mString = ir.split("\"");
+				strDeclaration.add("str " + mString[2].trim() + " \"" + mString[1] + "\"");
+			}
 			String[] tiny = ir.split("\\s");
 			switch(tiny.length) {
 				case 2:
@@ -68,6 +73,9 @@ class assembler {
 					}
 					else if (tiny[0].equals("WRITEF")) {
 						tinyTable.add("sys writer " + tiny[1]);
+					}
+					else if (tiny[0].equals("WRITES")) {
+						tinyTable.add("sys writes " + tiny[1]);
 					}
 				break;
 				case 3:
@@ -236,6 +244,10 @@ class assembler {
 			}
 		}
 		fin();
+
+		if (strDeclaration.size() != 0) {
+			tinyTable.addAll(0, strDeclaration);
+		}
 		return tinyTable;
 	}
 }

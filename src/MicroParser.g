@@ -49,10 +49,13 @@ grammar MicroParser;
 		while (mti.hasNext()) {
 			msTable cmte = (msTable) mti.next();
 			if (cmte.scope.equals("__global")) {
+				//System.out.println("** searching global for " + varName);
 				Iterator esti = cmte.symbolTable.iterator();
 				while (esti.hasNext()) {
 					mSymbol ese = (mSymbol) esti.next();
+					//System.out.println("*** at " + ese.getName());
 					if (ese.getName().equals(varName)) {
+						//System.out.println("*** -> returning " + ese.getType());
 						return ese.getType();
 					}
 				}
@@ -80,6 +83,9 @@ program 	: 'PROGRAM' id 'BEGIN' {
 		System.out.println(";" + irti.next());
 	}
 
+	for (msTable tableEntry: masterTable) {
+		tableEntry.listMember();
+	}
 	// Symbol table
 	//System.out.println("===================");
 	/*Iterator mti = masterTable.iterator();
@@ -122,6 +128,7 @@ decl 		: (string_decl | var_decl)*;
 string_decl	: 'STRING' id ':=' str ';'
 {
 	symbolTable.add(new mSymbol($id.text, "STRING", $str.text));
+	irTable.add(ir.store($str.text, $id.text, getType($id.text)));
 };
 str		: STRINGLITERAL;
 string_decl_tail: string_decl string_decl_tail?;

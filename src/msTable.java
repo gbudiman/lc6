@@ -17,4 +17,11 @@ class msTable {
 	public void attachTable(List<mSymbol> ns) {
 		symbolTable = ns;
 	}
+
+	public void listMember() {
+		System.out.println(";Scope: " + this.scope);
+		for (mSymbol symbolRow: symbolTable) {
+			System.out.println(";-- " + symbolRow.getName() + ": " + symbolRow.getType());
+		}
+	}
 }

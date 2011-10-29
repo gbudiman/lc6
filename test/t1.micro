@@ -1,0 +1,25 @@
+PROGRAM t1 BEGIN
+	INT a,b,c;
+	STRING intro := "You will be asked for three float numbers\n";
+	STRING first := "Enter 1st float: ";
+	STRING second := "Enter 2nd float: ";
+	STRING third := "Enter 3rd: ";
+	
+	--FUNCTION FLOAT add (FLOAT a, FLOAT b) BEGIN
+	--	FLOAT result;
+	--	result := a + b;
+	--	RETURN result;
+	--END
+
+	FUNCTION VOID main() BEGIN
+		FLOAT a,b,c;
+		WRITE(intro, first);
+		READ(a);
+		WRITE(second);
+		READ(b);
+		WRITE(third);
+		READ(c);
+		WRITE(a,b,c);
+		--RETURN 0;
+	END
+END

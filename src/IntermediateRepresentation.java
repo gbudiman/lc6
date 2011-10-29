@@ -64,8 +64,11 @@ class IntermediateRepresentation {
 		else if (type.equals("FLOAT")) {
 			return ("STOREF " + a + ' ' + result);
 		}
+		else if (type.equals("STRING")) {
+			return ("STORES " + a + ' ' + result);
+		}
 
-		return null;
+		return "Unimplemented datatype at store: " + type;
 	}
 
 	public String rw(String result, String action, String type) {
@@ -75,8 +78,11 @@ class IntermediateRepresentation {
 		else if (type.equals("FLOAT")) {
 			return (action + "F " + result);
 		}
+		else if (type.equals("STRING")) {
+			return (action + "S " + result);
+		}
 
-		return null;
+		return "Unimplemented datatype at rw: " + type;
 	}
 
 	public String comparison(String a, String b, String op, String target, String type) {
