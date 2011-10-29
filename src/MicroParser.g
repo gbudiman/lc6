@@ -167,6 +167,7 @@ param_decl_tail	: ',' param_decl param_decl_tail | ;
 func_declarations: (func_decl func_decl_tail)?;
 func_decl	: 'FUNCTION' any_type id 
 {
+	
 	Iterator fti = symbolTable.iterator();
 	while (fti.hasNext()) {
 		mSymbol init = (mSymbol) fti.next();
@@ -176,45 +177,83 @@ func_decl	: 'FUNCTION' any_type id
 	tms = new msTable($id.text);
 	symbolTable = new Vector<mSymbol>();
 }
-		'(' param_decl_list? ')' 'BEGIN' func_body 'END' ;
+		'(' param_decl_list? ')' 'BEGIN' func_body 'END' {
+	for (String c : $func_body.irs) {
+		System.out.println(";" + $id.text + " >> " + c);
+	}	
+};
 func_decl_tail	: func_decl*;
-func_body	: decl stmt_list;
+func_body returns [List<String> irs]	: decl stmt_list {
+		$irs = $stmt_list.irs;
+};
 /* Statement List */
-stmt_list	: stmt stmt_tail | ;
-stmt_tail	: stmt stmt_tail | ;
-stmt		: assign_stmt | read_stmt | write_stmt | return_stmt | if_stmt | do_stmt;
+stmt_list returns [List<String> irs]	
+		: stmt lambdaStmt = stmt_tail {
+		$lambdaStmt.irs.addAll(0, $stmt.irs);
+		$irs = $lambdaStmt.irs;
+		} | { $irs = new ArrayList(); };
+stmt_tail returns [List<String> irs]	
+		: stmt lambdaStmt = stmt_tail {
+		$lambdaStmt.irs.addAll(0, $stmt.irs);
+		$irs = $lambdaStmt.irs;
+		} | { $irs = new ArrayList(); };
+stmt returns [List<String> irs]		
+		: assign_stmt { $irs = $assign_stmt.irs; }
+		| read_stmt { $irs = $read_stmt.irs; }
+		| write_stmt { $irs = $write_stmt.irs; }
+		| return_stmt { $irs = $return_stmt.irs; }
+		| if_stmt { $irs = $if_stmt.irs; }
+		| do_stmt { $irs = $do_stmt.irs; };
 /* Basic Statement */
-assign_stmt	: assign_expr ';';
-assign_expr	: id ':=' expr {
-	//System.out.println($id.text + ", " + $expr.temp);
+assign_stmt returns [List<String> irs]	
+		: assign_expr ';' { $irs = $assign_expr.irs; } ;
+assign_expr returns [List<String> irs]	
+		: id ':=' expr {
+	List<String> localIrs = new ArrayList<String>();
 	if (getType($id.text).equals("INT") || getType($id.text).equals("FLOAT")) {
 		irTable.add(ir.store($expr.temp, $id.text, getType($id.text)));
+		localIrs.add(ir.store($expr.temp, $id.text, getType($id.text)));
 	}
+	$irs = localIrs;
 }
 ;
-read_stmt	: 'READ' '(' id_list ')' ';' {
+read_stmt returns [List<String> irs]
+		: 'READ' '(' id_list ')' ';' {
+
+	List<String> localIrs = new ArrayList<String>();
 	Stack<String> ds = new Stack<String>();
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
 		ds.push(ir.rw(i, "READ", getType(i)));
+		localIrs.add(ir.rw(i, "READ", getType(i)));
 		//irTable.add(ir.rw(i, "READ", getType(i)));
 	}
 	while (!ds.empty()) {
 		irTable.add(ds.pop());
 	}
+
+	$irs = localIrs;
 };
-write_stmt	: 'WRITE' '(' id_list ')' ';' {
+write_stmt returns [List<String> irs]
+		: 'WRITE' '(' id_list ')' ';' {
+	List<String> localIrs = new ArrayList<String>();
 	Stack<String> ds = new Stack<String>();
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
 		ds.push(ir.rw(i, "WRITE", getType(i)));
+		localIrs.add(ir.rw(i, "WRITE", getType(i)));
 		//irTable.add(ir.rw(i, "WRITE", getType(i)));
 	}
 	while (!ds.empty()) {
 		irTable.add(ds.pop());
 	}
+
+	$irs = localIrs;
 };
-return_stmt	: 'RETURN' expr ';';
+return_stmt returns [List<String> irs]	
+		: 'RETURN' expr ';' {
+	$irs = new ArrayList<String>();
+};
 /* Expressions */
 expr returns [String temp]
 		: factor expr_tail {
@@ -305,7 +344,11 @@ addop returns [char op]
 mulop returns [char op]
 		: '*' {$op = '*';} | '/' {$op = '/';};
 /* Comples Statemens and Condition */
-if_stmt 	: 'IF' '(' cond ')' 'THEN' stmt_list else_part 'ENDIF' {irTable.add(ir.label(labelStack.pop())); };
+if_stmt returns [List<String> irs] 	
+		: 'IF' '(' cond ')' 'THEN' stmt_list else_part 'ENDIF' {
+		irTable.add(ir.label(labelStack.pop()));
+		$irs = new ArrayList<String>(); 
+};
 else_part	: 'ELSE' {
 			String nextLabel = labelStack.pop();
 			irTable.add(ir.jump(labelStack.peek())); 
@@ -318,7 +361,8 @@ cond 		: l1=expr compop l2=expr {
 			irTable.add(ir.comparison($l1.temp, $l2.temp, $compop.text, nLabel, getType($l1.temp)));
 		};
 compop		: '<' | '>' | '=' | '!=';
-do_stmt		: 'DO' {
+do_stmt	returns [List<String> irs]	
+		: 'DO' {
 			String lLabel = ir.generateLabel();
 			labelStack.push(lLabel);
 			irTable.add(ir.label(lLabel));
@@ -329,6 +373,7 @@ do_stmt		: 'DO' {
 			String loopExit = labelStack.pop();
 			irTable.add(ir.jump(loopExit));
 			irTable.add(ir.label(loopBack));
+			$irs = new ArrayList<String>();
 		};
 
 fragment DIGIT          : '0'..'9';

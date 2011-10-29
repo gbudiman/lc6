@@ -5,11 +5,11 @@ PROGRAM t1 BEGIN
 	STRING second := "Enter 2nd float: ";
 	STRING third := "Enter 3rd: ";
 	
-	--FUNCTION FLOAT add (FLOAT a, FLOAT b) BEGIN
-	--	FLOAT result;
-	--	result := a + b;
-	--	RETURN result;
-	--END
+	FUNCTION FLOAT add (FLOAT a, FLOAT b) BEGIN
+		FLOAT result;
+		result := a + b;
+		RETURN result;
+	END
 
 	FUNCTION VOID main() BEGIN
 		FLOAT a,b,c;
