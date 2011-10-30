@@ -1,6 +1,9 @@
 class IntermediateRepresentation {
 	public int i = 0;
 	public int j = 0;
+	public int l = 0;
+	public int p = 0;
+	public int t = 0;
 	public IntermediateRepresentation() {
 	}
 
@@ -16,6 +19,30 @@ class IntermediateRepresentation {
 		return ("LABEL " + l);
 	}
 
+	public String generateTemp() {
+		return ("$T" + t++);
+	}
+	public void resetTemp() {
+		t = 0;
+	}
+
+	public String generateReturn() {
+		return "$R";
+	}
+
+	public String generateParameter() {
+		return ("$P" + p++);
+	}
+	public void resetParameter() {
+		p = 0;
+	}
+
+	public String generateLocal() {
+		return ("$L" + l++);
+	}
+	public void resetLocal() {
+		l = 0;
+	}
 	/*public String conditional(String left, String op, String right, String label, String type) {
 		String condition = "";
 		if (op.equals("<")) {
@@ -115,5 +142,17 @@ class IntermediateRepresentation {
 
 	public String label(String l) {
 		return ("LABEL " + l);
+	}
+
+	public String jsr(String s) {
+		return ("JSR " + s);
+	}
+
+	public String push(String s) {
+		return ("PUSH " + s);
+	}
+
+	public String pop(String s) {
+		return ("POP " + s);
 	}
 }

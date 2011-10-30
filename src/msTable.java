@@ -24,4 +24,5 @@ class msTable {
 			System.out.println(";-- " + symbolRow.getName() + ": " + symbolRow.getType());
 		}
 	}
+
 }

@@ -1,0 +1,22 @@
+PROGRAM basic2 BEGIN
+	FUNCTION INT add (INT a, INT b) BEGIN
+		INT result;
+		result := a + b;
+		RETURN result;
+	END
+
+	FUNCTION INT mul (INT a, INT b) BEGIN
+		INT result;
+		result := a * b;
+		RETURN result;
+	END
+
+	FUNCTION VOID main() BEGIN
+		INT x,y,addr;
+		x := 10;
+		y := 20;
+		addr := add(x,y);
+		WRITE(x,y,addr);
+		RETURN 0;
+	END
+END

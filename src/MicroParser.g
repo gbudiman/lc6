@@ -29,8 +29,10 @@ grammar MicroParser;
 	public IntermediateRepresentation ir = new IntermediateRepresentation();
 	public List<msTable> masterTable = new Vector<msTable>();
 	public List<mSymbol> symbolTable = new Vector<mSymbol>();
+	public List<masterIR> mirList = new Vector<masterIR>();
 	public List<String> irTable = new Vector<String>();
 	public msTable tms = new msTable("__global");
+	public masterIR mir = new masterIR("__global");
 	public assembler a = new assembler();
 	public Stack<String> labelStack = new Stack<String>();
 
@@ -66,26 +68,51 @@ grammar MicroParser;
 		System.out.println("Variable " + varName + " not found");
 		return null;
 	}
+
+
+	public List<String> flatten(List<masterIR> mirList) {
+		List<String> flatIR = new Vector<String>();
+		for (masterIR tmir: mirList) {
+			for (String eir: tmir.ir) {
+				flatIR.add(eir);
+			}
+		}
+
+		return flatIR;
+	}
+
+        public String findParameter(String name, List<mSymbol> stab) {
+                for (mSymbol d : stab) {
+                        if (d.getName().equals(name)) {
+                                return d.getID();
+                        }
+                }
+                return name;
+        }
+
 }
 /* Program */
 program 	: 'PROGRAM' id 'BEGIN' {
-			irTable.add(ir.generateLabel("main"));
+			//irTable.add(ir.generateLabel("main"));
 		} 
 		pgm_body 'END'
 {
 	tms.attachTable(symbolTable);
+	mir.attachTable(irTable);
 	masterTable.add(tms);
+	mirList.add(mir);
 
 	// IR table
 	//System.out.println("===================");
-	Iterator irti = irTable.iterator();
+	/*Iterator irti = irTable.iterator();
 	while (irti.hasNext()) {
 		System.out.println(";" + irti.next());
-	}
+	}*/
 
-	for (msTable tableEntry: masterTable) {
+	/*for (msTable tableEntry: masterTable) {
 		tableEntry.listMember();
-	}
+	}*/
+
 	// Symbol table
 	//System.out.println("===================");
 	/*Iterator mti = masterTable.iterator();
@@ -112,8 +139,15 @@ program 	: 'PROGRAM' id 'BEGIN' {
 	}*/
 	// End Symbol Table
 
+	for (masterIR xmir : mirList) {
+		System.out.println("; *** " + xmir.scope);
+		for (String k : xmir.ir) {
+			System.out.println("; " + k);
+		}
+	}
+
 	a.init(masterTable);
-	List<String> tinyOutput = a.process(irTable, false);
+	List<String> tinyOutput = a.process(flatten(mirList), false);
 
 	//System.out.println("===================");
 	for (String x: tinyOutput) {
@@ -137,7 +171,7 @@ var_decl	: var_type id_list ';'
 {
 	while (!$id_list.stringList.empty()) {
 		String t = $id_list.stringList.pop();
-		symbolTable.add(new mSymbol(t, $var_type.text));
+		symbolTable.add(new mSymbol(t, $var_type.text, ir.generateLocal(), "L"));
 	}
 };
 var_type	: 'FLOAT' | 'INT';
@@ -161,7 +195,9 @@ id_tail returns [ Stack<String> stringList ]
 var_decl_tail	: var_decl var_decl_tail?;
 /* Function Parameter List */
 param_decl_list : param_decl param_decl_tail;
-param_decl	: var_type id;
+param_decl	: var_type id {
+		symbolTable.add(new mSymbol($id.text, $var_type.text, ir.generateParameter(), "P"));
+};
 param_decl_tail	: ',' param_decl param_decl_tail | ;
 /* Function Delcarations */
 func_declarations: (func_decl func_decl_tail)?;
@@ -173,14 +209,25 @@ func_decl	: 'FUNCTION' any_type id
 		mSymbol init = (mSymbol) fti.next();
 	}
 	tms.attachTable(symbolTable);
+	mir.attachTable(irTable);
 	masterTable.add(tms);
+	mirList.add(mir);
 	tms = new msTable($id.text);
+	mir = new masterIR($id.text);
 	symbolTable = new Vector<mSymbol>();
+	irTable = new Vector<String>();
+	ir.resetParameter();
+	ir.resetLocal();
 }
 		'(' param_decl_list? ')' 'BEGIN' func_body 'END' {
-	for (String c : $func_body.irs) {
+	irTable.add(0, "LINK");
+	irTable.add(0, "LABEL " + $id.text);
+	irTable.add(0, "Generating code for function " + $id.text);
+	/*for (String c : $func_body.irs) {
 		System.out.println(";" + $id.text + " >> " + c);
-	}	
+		//System.out.println(";" + c);
+		irTable.add(c);
+	}*/	
 };
 func_decl_tail	: func_decl*;
 func_body returns [List<String> irs]	: decl stmt_list {
@@ -211,8 +258,11 @@ assign_expr returns [List<String> irs]
 		: id ':=' expr {
 	List<String> localIrs = new ArrayList<String>();
 	if (getType($id.text).equals("INT") || getType($id.text).equals("FLOAT")) {
-		irTable.add(ir.store($expr.temp, $id.text, getType($id.text)));
-		localIrs.add(ir.store($expr.temp, $id.text, getType($id.text)));
+		//irTable.add(ir.store($expr.temp, $id.text, getType($id.text)));
+		irTable.add(ir.store($expr.temp
+				, findParameter($id.text, symbolTable)
+				, getType($id.text)));
+		//localIrs.add(ir.store($expr.temp, $id.text, getType($id.text)));
 	}
 	$irs = localIrs;
 }
@@ -225,7 +275,7 @@ read_stmt returns [List<String> irs]
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
 		ds.push(ir.rw(i, "READ", getType(i)));
-		localIrs.add(ir.rw(i, "READ", getType(i)));
+		//localIrs.add(ir.rw(i, "READ", getType(i)));
 		//irTable.add(ir.rw(i, "READ", getType(i)));
 	}
 	while (!ds.empty()) {
@@ -241,7 +291,7 @@ write_stmt returns [List<String> irs]
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
 		ds.push(ir.rw(i, "WRITE", getType(i)));
-		localIrs.add(ir.rw(i, "WRITE", getType(i)));
+		//localIrs.add(ir.rw(i, "WRITE", getType(i)));
 		//irTable.add(ir.rw(i, "WRITE", getType(i)));
 	}
 	while (!ds.empty()) {
@@ -253,6 +303,10 @@ write_stmt returns [List<String> irs]
 return_stmt returns [List<String> irs]	
 		: 'RETURN' expr ';' {
 	$irs = new ArrayList<String>();
+	irTable.add(ir.store(findParameter($expr.temp, symbolTable)
+			, ir.generateReturn()
+			, getType($expr.temp)));	
+	irTable.add("RET");
 };
 /* Expressions */
 expr returns [String temp]
@@ -268,7 +322,12 @@ expr returns [String temp]
 			tempVar = $expr_tail.temp.removeFirst();
 			//System.out.println("left: " + left + " tail: " + tempOp + ", " + tempVar);
 			
-			irTable.add(ir.arithmetic(left, tempVar, result, tempOp, getType(tempVar)));
+			//irTable.add(ir.arithmetic(left, tempVar, result, tempOp, getType(tempVar)));
+			irTable.add(ir.arithmetic(findParameter(left, symbolTable)
+						, findParameter(tempVar, symbolTable)
+						, result
+						, tempOp
+						, getType(tempVar)));
 			symbolTable.add(new mSymbol(result, getType(tempVar)));
 			left = result;
 		}
