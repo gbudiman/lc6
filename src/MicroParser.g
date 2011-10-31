@@ -82,11 +82,21 @@ grammar MicroParser;
 	}
 
         public String findParameter(String name, List<mSymbol> stab) {
+		boolean debug = false;
+		if (debug) System.out.print(";>Searching for " + name);
                 for (mSymbol d : stab) {
                         if (d.getName().equals(name)) {
-                                return d.getID();
+				if (d.getID() != null) {
+					if (debug) System.out.print(" returns " + d.getID() + "\n");
+	                                return d.getID();
+				}
+				else {
+					if (debug) System.out.print(" returns " + name + "\n");
+					return name;
+				}
                         }
                 }
+		if (debug) System.out.print(" returns " + name + "\n");
                 return name;
         }
 
@@ -356,7 +366,9 @@ factor returns [String temp]
 			tempOp = $factor_tail.ops.removeFirst();
 			tempVar = $factor_tail.temp.removeFirst();
 		
-			irTable.add(ir.arithmetic(left, tempVar, result, tempOp, getType(tempVar)));
+			irTable.add(ir.arithmetic(findParameter(left, symbolTable)
+						, findParameter(tempVar, symbolTable)
+						, result, tempOp, getType(tempVar)));
 			symbolTable.add(new mSymbol(result, getType(tempVar)));
 			left = result;
 		}
@@ -379,8 +391,19 @@ postfix_expr returns [String temp]
 		} | call_expr;
 call_expr returns [String temp]
 		: id '(' expr_list? ')';
-expr_list	: expr expr_list_tail;
-expr_list_tail 	: ',' expr expr_list_tail |;
+expr_list returns [List<String> irs]
+		: expr eLambda = expr_list_tail {
+		$eLambda.irs.add($expr.temp);
+		$irs = $eLambda.irs;
+};
+expr_list_tail returns [List<String> irs]
+		: ',' expr eLambda = expr_list_tail {
+		$eLambda.irs.add($expr.temp);
+		$irs = $eLambda.irs;
+}
+		| {
+		$irs = new ArrayList();
+};
 primary returns [String temp]
 		: '(' expr ')' {
 			$temp = $expr.temp;
@@ -417,7 +440,9 @@ cond 		: l1=expr compop l2=expr {
 			labelStack.push(ir.generateLabel());
 			String nLabel = ir.generateLabel();
 			labelStack.push(nLabel);
-			irTable.add(ir.comparison($l1.temp, $l2.temp, $compop.text, nLabel, getType($l1.temp)));
+			irTable.add(ir.comparison(findParameter($l1.temp, symbolTable)
+						, findParameter($l2.temp, symbolTable)
+						, $compop.text, nLabel, getType($l1.temp)));
 		};
 compop		: '<' | '>' | '=' | '!=';
 do_stmt	returns [List<String> irs]	

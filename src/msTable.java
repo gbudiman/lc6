@@ -21,7 +21,7 @@ class msTable {
 	public void listMember() {
 		System.out.println(";Scope: " + this.scope);
 		for (mSymbol symbolRow: symbolTable) {
-			System.out.println(";-- " + symbolRow.getName() + ": " + symbolRow.getType());
+			System.out.println(";-- " + symbolRow.getName() + ": " + symbolRow.getType() + " (" + symbolRow.getVarClass() + ") " + symbolRow.getID());
 		}
 	}
 
