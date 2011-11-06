@@ -148,8 +148,16 @@ class IntermediateRepresentation {
 		return ("JSR " + s);
 	}
 
+	public String push() {
+		return("PUSH");
+	}
+
 	public String push(String s) {
 		return ("PUSH " + s);
+	}
+
+	public String pop() {
+		return ("POP");
 	}
 
 	public String pop(String s) {

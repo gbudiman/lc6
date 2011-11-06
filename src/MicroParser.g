@@ -82,7 +82,7 @@ grammar MicroParser;
 	}
 
         public String findParameter(String name, List<mSymbol> stab) {
-		boolean debug = false;
+		boolean debug = true;
 		if (debug) System.out.print(";>Searching for " + name);
                 for (mSymbol d : stab) {
                         if (d.getName().equals(name)) {
@@ -284,7 +284,7 @@ read_stmt returns [List<String> irs]
 	Stack<String> ds = new Stack<String>();
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
-		ds.push(ir.rw(i, "READ", getType(i)));
+		ds.push(ir.rw(findParameter(i, symbolTable), "READ", getType(i)));
 		//localIrs.add(ir.rw(i, "READ", getType(i)));
 		//irTable.add(ir.rw(i, "READ", getType(i)));
 	}
@@ -300,7 +300,7 @@ write_stmt returns [List<String> irs]
 	Stack<String> ds = new Stack<String>();
 	for (String i : $id_list.stringList) {
 		//System.out.println(i + " " + getType(i));
-		ds.push(ir.rw(i, "WRITE", getType(i)));
+		ds.push(ir.rw(findParameter(i, symbolTable), "WRITE", getType(i)));
 		//localIrs.add(ir.rw(i, "WRITE", getType(i)));
 		//irTable.add(ir.rw(i, "WRITE", getType(i)));
 	}
@@ -388,9 +388,27 @@ factor_tail returns [LinkedList<Character> ops, LinkedList<String> temp]
 postfix_expr returns [String temp]
 		: primary {
 			$temp = $primary.temp;
-		} | call_expr;
+		} | call_expr {
+		$temp = $call_expr.temp;
+};
 call_expr returns [String temp]
-		: id '(' expr_list? ')';
+		: id '(' expr_list? ')' {
+
+		String tVar;
+		int i;
+		int exprSize = $expr_list.irs.size();
+		irTable.add(ir.push());
+
+		for (i = exprSize; i > 0; i--) {
+			tVar = $expr_list.irs.get(i - 1);
+			irTable.add(ir.push(findParameter(tVar, symbolTable)));
+		}
+		irTable.add(ir.jsr($id.text));
+		for (i = 0; i < exprSize; i++) {
+			irTable.add(ir.pop());
+		}
+		irTable.add(ir.pop(($temp = ir.generate())));
+};
 expr_list returns [List<String> irs]
 		: expr eLambda = expr_list_tail {
 		$eLambda.irs.add($expr.temp);
