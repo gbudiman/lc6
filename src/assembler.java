@@ -54,7 +54,7 @@ class assembler {
 		tinyTable.add("push r1");
 		tinyTable.add("push r2");
 		tinyTable.add("push r3");
-		tinyTable.add("jsr " + target);
+		tinyTable.add("jsr " + target.trim());
 		tinyTable.add("pop r3");
 		tinyTable.add("pop r2");
 		tinyTable.add("pop r1");
@@ -64,7 +64,6 @@ class assembler {
 	public void fin() {
 		tinyTable.add("unlnk");
 		tinyTable.add("ret");
-		tinyTable.add("end");
 	}
 
 	public List<String> process(List<String> irTable, boolean debug) {
@@ -78,7 +77,7 @@ class assembler {
 				continue;
 			}
 			String[] tiny = ir.split("\\s");
-			tinyTable.add(";Parsing: " + ir);
+			//tinyTable.add(";Parsing: " + ir);
 			switch(tiny.length) {
 				case 1:
 					if (tiny[0].equals("RET")) {
@@ -115,16 +114,15 @@ class assembler {
 					if (tiny[0].equals("MAKESPACE")) {
 						space = Integer.parseInt(tiny[1]);
 						localTable = new Vector<String>();
-						tinyTable.add("; LOCAL TABLE RESET ;");
 					}
 					else if (tiny[0].equals("MAKEPARAM")) {
 						parameter = Integer.parseInt(tiny[1]);
 					}
 					else if (tiny[0].equals("JUMP")) {
-						tinyTable.add("jmp " + tiny[1]);
+						tinyTable.add("jmp " + tiny[1].trim());
 					}
 					else if (tiny[0].equals("LABEL")) {
-						tinyTable.add("label " + tiny[1]);
+						tinyTable.add("label " + tiny[1].trim());
 						if (!tiny[1].startsWith("LABEL")) {
 							tinyTable.add("link " + space);
 						}
@@ -142,7 +140,7 @@ class assembler {
 						tinyTable.add("sys writer " + t1);
 					}
 					else if (tiny[0].equals("WRITES")) {
-						tinyTable.add("sys writes " + 1);
+						tinyTable.add("sys writes " + t1);
 					}
 					else if (tiny[0].equals("JSR")) {
 						linkCount = 0;
@@ -167,8 +165,8 @@ class assembler {
 					}
 					else if (tiny[1].startsWith("$L")) {
 						use = true;
-						registerCounter = varTable.indexOf(tiny[1]);
-						if (varTable.indexOf(tiny[1]) == -1) {
+						registerCounter = localTable.indexOf(tiny[1]);
+						if (localTable.indexOf(tiny[1]) == -1) {
 							localTable.add(tiny[1]);
 							registerCounter = localTable.size();
 						}
@@ -203,8 +201,8 @@ class assembler {
 					}
 					else if (tiny[2].startsWith("$L")) {
 						use = true;
-						registerCounter = varTable.indexOf(tiny[2]);
-						if (varTable.indexOf(tiny[2]) == -1) {
+						registerCounter = localTable.indexOf(tiny[2]);
+						if (localTable.indexOf(tiny[2]) == -1) {
 							localTable.add(tiny[2]);
 							registerCounter = localTable.size();
 						}
@@ -222,6 +220,7 @@ class assembler {
 						}
 					}
 					else if (tiny[2].startsWith("$R")) {
+						use = false;
 						t2 = "$" + (5 + parameter + 1);
 					}
 					else {
@@ -299,7 +298,7 @@ class assembler {
 						t2 = "$-" + registerCounter;
 					}
 					else if (tiny[2].startsWith("$P")) {
-						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[1].substring(2)));
+						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[2].substring(2)));
 						/*if (tiny[2].equals("$P1")) {
 							t2 = "$1";
 						}
@@ -336,7 +335,7 @@ class assembler {
 						t3 = "$-" + registerCounter;
 					}
 					else if (tiny[3].startsWith("$P")) {
-						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[1].substring(2)));
+						t3 = "$" + (5 + 1 + Integer.parseInt(tiny[3].substring(2)));
 						/*if (tiny[3].equals("$P1")) {
 							t3 = "$1";
 						}
@@ -445,6 +444,7 @@ class assembler {
 		/*if (strDeclaration.size() != 0) {
 			tinyTable.addAll(0, strDeclaration);
 		}*/
+		tinyTable.add("end");
 		return tinyTable;
 	}
 }

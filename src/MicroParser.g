@@ -129,7 +129,7 @@ program 	: 'PROGRAM' id 'BEGIN' {
 
 	// Symbol table
 	//System.out.println("===================");
-	Iterator mti = masterTable.iterator();
+	/*Iterator mti = masterTable.iterator();
 	while (mti.hasNext()) {
 		msTable cmte = (msTable) mti.next();
 		if (cmte.scope.equals("__global")) {
@@ -151,7 +151,7 @@ program 	: 'PROGRAM' id 'BEGIN' {
 			System.out.println();
 		}
 		System.out.println();
-	}
+	}*/
 	// End Symbol Table
 
 	for (masterIR xmir : mirList) {
