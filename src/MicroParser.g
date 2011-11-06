@@ -35,6 +35,8 @@ grammar MicroParser;
 	public masterIR mir = new masterIR("__global");
 	public assembler a = new assembler();
 	public Stack<String> labelStack = new Stack<String>();
+	public int space = 0;
+	public int parameter = 0;
 
 	public String getType(String varName) {
 		Iterator mtc = symbolTable.iterator();
@@ -73,6 +75,8 @@ grammar MicroParser;
 	public List<String> flatten(List<masterIR> mirList) {
 		List<String> flatIR = new Vector<String>();
 		for (masterIR tmir: mirList) {
+			flatIR.add("MAKESPACE " + tmir.Space);
+			flatIR.add("MAKEPARAM " + tmir.parameter);
 			for (String eir: tmir.ir) {
 				flatIR.add(eir);
 			}
@@ -82,7 +86,7 @@ grammar MicroParser;
 	}
 
         public String findParameter(String name, List<mSymbol> stab) {
-		boolean debug = true;
+		boolean debug = false;
 		if (debug) System.out.print(";>Searching for " + name);
                 for (mSymbol d : stab) {
                         if (d.getName().equals(name)) {
@@ -108,7 +112,7 @@ program 	: 'PROGRAM' id 'BEGIN' {
 		pgm_body 'END'
 {
 	tms.attachTable(symbolTable);
-	mir.attachTable(irTable);
+	mir.attachTable(irTable, space, parameter);
 	masterTable.add(tms);
 	mirList.add(mir);
 
@@ -125,7 +129,7 @@ program 	: 'PROGRAM' id 'BEGIN' {
 
 	// Symbol table
 	//System.out.println("===================");
-	/*Iterator mti = masterTable.iterator();
+	Iterator mti = masterTable.iterator();
 	while (mti.hasNext()) {
 		msTable cmte = (msTable) mti.next();
 		if (cmte.scope.equals("__global")) {
@@ -143,10 +147,11 @@ program 	: 'PROGRAM' id 'BEGIN' {
 			if (ese.getValue() != "") {
 				System.out.print(" value: " + ese.getValue());
 			}
+			System.out.print(" id " + ese.getID());
 			System.out.println();
 		}
 		System.out.println();
-	}*/
+	}
 	// End Symbol Table
 
 	for (masterIR xmir : mirList) {
@@ -182,6 +187,7 @@ var_decl	: var_type id_list ';'
 	while (!$id_list.stringList.empty()) {
 		String t = $id_list.stringList.pop();
 		symbolTable.add(new mSymbol(t, $var_type.text, ir.generateLocal(), "L"));
+		space++;
 	}
 };
 var_type	: 'FLOAT' | 'INT';
@@ -207,6 +213,7 @@ var_decl_tail	: var_decl var_decl_tail?;
 param_decl_list : param_decl param_decl_tail;
 param_decl	: var_type id {
 		symbolTable.add(new mSymbol($id.text, $var_type.text, ir.generateParameter(), "P"));
+		parameter++;
 };
 param_decl_tail	: ',' param_decl param_decl_tail | ;
 /* Function Delcarations */
@@ -219,7 +226,7 @@ func_decl	: 'FUNCTION' any_type id
 		mSymbol init = (mSymbol) fti.next();
 	}
 	tms.attachTable(symbolTable);
-	mir.attachTable(irTable);
+	mir.attachTable(irTable, space, parameter);
 	masterTable.add(tms);
 	mirList.add(mir);
 	tms = new msTable($id.text);
@@ -228,6 +235,8 @@ func_decl	: 'FUNCTION' any_type id
 	irTable = new Vector<String>();
 	ir.resetParameter();
 	ir.resetLocal();
+	space = 0;
+	parameter = 0;
 }
 		'(' param_decl_list? ')' 'BEGIN' func_body 'END' {
 	irTable.add(0, "LINK");
