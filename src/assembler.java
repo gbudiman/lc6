@@ -77,7 +77,7 @@ class assembler {
 				continue;
 			}
 			String[] tiny = ir.split("\\s");
-			//tinyTable.add(";Parsing: " + ir);
+			tinyTable.add(";Parsing: " + ir);
 			switch(tiny.length) {
 				case 1:
 					if (tiny[0].equals("RET")) {
@@ -348,6 +348,10 @@ class assembler {
 					}
 					else {
 						t3 = tiny[3];
+					}
+
+					if (tiny[1].startsWith("$L") && tiny[2].startsWith("$L")) {
+						use = false;
 					}
 
 					if (use) {

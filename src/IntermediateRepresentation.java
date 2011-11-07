@@ -116,13 +116,13 @@ class IntermediateRepresentation {
 		String opcode = "";
 
 		// need to reverse operands if comparing register (comes first) with memory
-		if (a.startsWith("$")) {
+		/*if (a.startsWith("$")) {
 			String temp = a;
 			a = b;
 			b = temp;
 			if (op.equals("<")) { op = ">"; }
 			else if (op.equals(">")) { op = "<"; }
-		}
+		}*/
 		if (op.equals("<")) { opcode += "GEQ"; }
 		else if (op.equals("<=")) { opcode += "GE"; }
 		else if (op.equals(">")) { opcode += "LEQ"; }
