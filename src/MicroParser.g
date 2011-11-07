@@ -1,9 +1,9 @@
 grammar MicroParser;
 @rulecatch {
-	catch (RecognitionException re) {
+	/*catch (RecognitionException re) {
 		System.out.println("Not Accepted\n");
 		System.exit(1);	
-	}
+	}*/
 }
 @header {
 	import java.util.Vector;

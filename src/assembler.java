@@ -176,12 +176,13 @@ class assembler {
 						t1 = "$-" + registerCounter;
 					}
 					else if (tiny[1].startsWith("$P")) {
-						if (tiny[1].equals("$P1")) {
+						t1 = "$" + (5 + 1 + parameter - Integer.parseInt(tiny[1].substring(2)));
+						/*if (tiny[1].equals("$P1")) {
 							t1 = "$1";
 						}
 						else if (tiny[1].equals("$P2")) {
 							t1 = "$2";
-						}
+						}*/
 					}
 					else if (tiny[1].startsWith("$R")) {
 						t1 = "$3";
@@ -212,12 +213,13 @@ class assembler {
 						t2 = "$-" + registerCounter;
 					}
 					else if (tiny[2].startsWith("$P")) {
-						if (tiny[2].equals("$P1")) {
+						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[2].substring(2)));
+						/*if (tiny[2].equals("$P1")) {
 							t2 = "$1";
 						}
 						else if (tiny[1].equals("$P2")) {
 							t2 = "$2";
-						}
+						}*/
 					}
 					else if (tiny[2].startsWith("$R")) {
 						use = false;

@@ -32,7 +32,8 @@ public class Micro {
 	CommonTokenStream tokens = new CommonTokenStream(lex);
 	MicroParserParser parser = new MicroParserParser(tokens);
 
-	parser.program();
+	try {
+		parser.program();
 		/*parser.program();
 		if (parser.getErrorCount() > 0) {
 			System.out.println("Not accepted");
@@ -40,9 +41,9 @@ public class Micro {
 		else {
 			System.out.println("Accepted");
 		}*/
-	//} catch (RecognitionException t) {
-		//System.out.print(t.line);
+	} catch (RecognitionException t) {
+		System.out.println("Line " + t.line + " char " + t.charPositionInLine);
 		//System.out.println("Not Accepted");
-	//}
+	}
     }
 }
