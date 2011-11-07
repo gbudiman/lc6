@@ -107,6 +107,9 @@ class assembler {
 						}
 						t1 = "$-" + registerCounter;
 					}
+					else if (tiny[1].startsWith("$P")) {
+						t1 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[1].substring(2)));
+					}
 					else {
 						t1 = tiny[1];
 					}
@@ -176,7 +179,7 @@ class assembler {
 						t1 = "$-" + registerCounter;
 					}
 					else if (tiny[1].startsWith("$P")) {
-						t1 = "$" + (5 + 1 + parameter - Integer.parseInt(tiny[1].substring(2)));
+						t1 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[1].substring(2)));
 						/*if (tiny[1].equals("$P1")) {
 							t1 = "$1";
 						}
@@ -185,7 +188,7 @@ class assembler {
 						}*/
 					}
 					else if (tiny[1].startsWith("$R")) {
-						t1 = "$3";
+						t1 = "$" + (5 + 1 + parameter);
 					}
 					else {
 						t1 = tiny[1];
@@ -213,7 +216,7 @@ class assembler {
 						t2 = "$-" + registerCounter;
 					}
 					else if (tiny[2].startsWith("$P")) {
-						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[2].substring(2)));
+						t2 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[2].substring(2)));
 						/*if (tiny[2].equals("$P1")) {
 							t2 = "$1";
 						}
@@ -263,7 +266,7 @@ class assembler {
 						t1 = "$-" + registerCounter;
 					}
 					else if (tiny[1].startsWith("$P")) {
-						t1 = "$" + (5 + 1 + Integer.parseInt(tiny[1].substring(2)));
+						t1 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[1].substring(2)));
 						/*if (tiny[1].equals("$P1")) {
 							t1 = "$1";
 						}
@@ -272,7 +275,7 @@ class assembler {
 						}*/
 					}
 					else if (tiny[1].startsWith("$R")) {
-						t1 = "$3";
+						t1 = "$" + (5 + parameter + 1);
 					}
 					else {
 						t1 = tiny[1];
@@ -300,7 +303,7 @@ class assembler {
 						t2 = "$-" + registerCounter;
 					}
 					else if (tiny[2].startsWith("$P")) {
-						t2 = "$" + (5 + 1 + Integer.parseInt(tiny[2].substring(2)));
+						t2 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[2].substring(2)));
 						/*if (tiny[2].equals("$P1")) {
 							t2 = "$1";
 						}
@@ -309,7 +312,7 @@ class assembler {
 						}*/
 					}
 					else if (tiny[2].startsWith("$R")) {
-						t2 = "$3";
+						t2 = "$" + (5 + parameter + 1);
 					}
 					else {
 						t2 = tiny[2];
@@ -337,7 +340,7 @@ class assembler {
 						t3 = "$-" + registerCounter;
 					}
 					else if (tiny[3].startsWith("$P")) {
-						t3 = "$" + (5 + 1 + Integer.parseInt(tiny[3].substring(2)));
+						t3 = "$" + (5 + 0 + parameter - Integer.parseInt(tiny[3].substring(2)));
 						/*if (tiny[3].equals("$P1")) {
 							t3 = "$1";
 						}
@@ -346,7 +349,7 @@ class assembler {
 						}*/
 					}
 					else if (tiny[3].startsWith("$R")) {
-						t3 = "$3";
+						t3 = "$" + (5 + parameter + 1);
 					}
 					else {
 						t3 = tiny[3];
