@@ -335,6 +335,7 @@ expr returns [String temp]
 		String left = $factor.temp;
 		//System.out.println("xl: " + left);
 
+		//System.out.println(";!> " + $expr.text + " left: " + left);
 		while(!$expr_tail.ops.isEmpty()) {
 			String result = ir.generate();
 			tempOp = $expr_tail.ops.removeFirst();
@@ -399,6 +400,8 @@ postfix_expr returns [String temp]
 			$temp = $primary.temp;
 		} | call_expr {
 		$temp = $call_expr.temp;
+		//System.out.println(";cc> " + $call_expr.text);
+		symbolTable.add(new mSymbol($temp, "INT"));
 };
 call_expr returns [String temp]
 		: id '(' expr_list? ')' {
