@@ -72,6 +72,7 @@ class IntermediateRepresentation {
 			case '-': opcode += "SUB";	break;
 			case '*': opcode += "MULT";	break;
 			case '/': opcode += "DIV";	break;
+			default: opcode += ";UNHANDLED";break;
 		}
 
 		if (type.equals("INT")) {
@@ -116,13 +117,13 @@ class IntermediateRepresentation {
 		String opcode = "";
 
 		// need to reverse operands if comparing register (comes first) with memory
-		/*if (a.startsWith("$")) {
+		if (a.startsWith("$T") && b.startsWith("$P")) {
 			String temp = a;
 			a = b;
 			b = temp;
 			if (op.equals("<")) { op = ">"; }
 			else if (op.equals(">")) { op = "<"; }
-		}*/
+		}
 		if (op.equals("<")) { opcode += "GEQ"; }
 		else if (op.equals("<=")) { opcode += "GE"; }
 		else if (op.equals(">")) { opcode += "LEQ"; }
